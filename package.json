@@ -1,0 +1,24 @@
+{
+  "name": "guess_where_app",
+  "version": "1.0.0",
+  "description": "backend for guess where app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "omar bitar",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.2",
+    "cloudinary": "^1.11.0",
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "jsonwebtoken": "^8.2.1",
+    "mongoose": "^5.0.16",
+    "morgan": "^1.9.0",
+    "save": "^2.3.2"
+  }
+}
