@@ -43,7 +43,7 @@ apiRouter.get('/', function(req, res) {
 //CREATE A USER ACCOUNT, WITH NAME, PASS, USERNAME
 //=============================================================================================
 // create a user (accessed at POST http://localhost:8080/signup)
-apiRouter.post('/discoveries',function(req, res) {
+apiRouter.post('/signup',function(req, res) {
 	if (!req.body.username || !req.body.password) {
 		res.json({success: false, msg: 'Please pass username and password.'});
 	}else{
