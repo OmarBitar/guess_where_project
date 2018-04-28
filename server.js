@@ -233,7 +233,7 @@ apiRouter.post('/photos', function(req,res){
             var tempPhoto = new Photos();
                //create link
             var Tpublic_id= userId.username;
-            var Tversion = new Date().getTime() / 1000;;
+            var Tversion = new Date().getTime() / 1000;
             var Tformat= 'jpg';
             var Tsecure_url= 'https://res.cloudinary.com/image/upload/d'+Tversion+'/'+Tpublic_id+'.'+Tformat;
             //save to db
@@ -293,23 +293,56 @@ apiRouter.get('/leaderboards',function(req,res){
 	})
 
 });
+
+function toRadians (angle) {
+	return angle * (Math.PI / 180);
+  }
+
+function calcDistance(reqBody) {
+	var lon1 = parseFloat(reqBody.longA);
+	var	lat1 = parseFloat(reqBody.latA);
+
+	//provide info for picture B
+	var lon2 = parseFloat(reqBody.longB);
+	var	lat2 = parseFloat(reqBody.latB);
+
+	var win = false;
+	
+	var R = 6371; // metres
+	var φ1 = toRadians(lat1);
+	//console.log(φ1 + " phi1");
+	var φ2 = toRadians(lat2);
+	//console.log(φ2 + " phi2");
+	var Δφ = toRadians(lat2-lat1);
+	//console.log(Δφ + " dPhi");
+	var Δλ = toRadians(lon2-lon1);
+	//console.log(Δλ + " dLambda");
+
+	var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+			Math.cos(φ1) * Math.cos(φ2) *
+			Math.sin(Δλ/2) * Math.sin(Δλ/2);
+	//console.log(a + " a");
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	//console.log(c + " c");
+
+	var d = R * c;
+	console.log(d);
+	return d;
+}  
+
 //=============================================================================================
 //GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
 //=============================================================================================
 apiRouter.post('/gpscompare',function(req,res){
 
-	//provide info for picture A
-	var photoLongA = req.body.longA;
-	var	photoLatA = req.body.latA;
-
-	//provide info for picture B
-	var photoLongB = req.body.longB;
-	var	photoLatB = req.body.latB;
-
 	var win = false;
-	/* 
-		code algorithm that calls the google api and compares if both photos are in close proximity 
-	*/
+	
+	if(calcDistance(req.body) < 2){
+		win = true;
+	}
+
+	
+
 	if(win===true) res.json({success: true});
 	else res.json({success: false});
 
