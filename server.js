@@ -231,39 +231,44 @@ apiRouter.post('/photos', function(req,res){
 
 			//save new photo
             var tempPhoto = new Photos();
-               //create link
-            var Tpublic_id= userId.username;
-            var Tversion = new Date().getTime() / 1000;
-            var Tformat= 'jpg';
-            var Tsecure_url= 'https://res.cloudinary.com/image/upload/d'+Tversion+'/'+Tpublic_id+'.'+Tformat;
+			   //create link
+			var timestamp = Math.floor(Date.now() / 1000)
+            var Tpublic_id= userId.username + timestamp;
+			//var Tversion = new Date().getTime() / 1000;
+			var Tversion = 1;
+			var Tformat= 'jpg';
+			//define link here to create a temporary Tversion
+            var Tsecure_url= 'https://res.cloudinary.com/image/upload/v'+Tversion+'/'+Tpublic_id+'.'+Tformat;
             //save to db
             tempPhoto.img_url = Tsecure_url;
             tempPhoto.longitude = tempLong;
-            tempPhoto.latitude = tempLat;
-            //save to db and cloud
-            tempPhoto.save(function(err){
-                if (err) {
-                    return res.send(err);
-                }
-                else{
-                      //save to cloud
-                    cloudinary.uploader.upload(photo, function(result) { 
-                        console.log(result) 
-                    },
-                    {
-                        public_id: Tpublic_id,
-                        version: Tversion,
-                        format: Tformat,
-                        secure_url: Tsecure_url
-                    });  
-
-                    res.json({
-                        success: true,
-                        message: 'image saved to cloud'
-                    })
-                }
-            })
-            console.log('image saved to db');
+			tempPhoto.latitude = tempLat;
+			  //save to cloud
+			  cloudinary.uploader.upload(photo, function(result) { 
+				console.log(result) 
+				Tversion = result.version; 
+				//update link with the actual twersion
+				tempPhoto.img_url= 'https://res.cloudinary.com/dcwatg3bm/image/upload/v'+Tversion+'/'+Tpublic_id+'.'+Tformat;
+				  //save to db and cloud
+				  tempPhoto.save(function(err){
+					if (err) {
+						return res.send(err);
+					}
+					else{
+						res.json({
+							success: true,
+							message: 'image saved to cloud'
+						})
+					}
+				})
+				console.log('image saved to db');
+			},
+			{
+				public_id: Tpublic_id,
+				version: Tversion,
+				format: Tformat,
+				secure_url: Tsecure_url
+			});      
         }
 	})	
 
