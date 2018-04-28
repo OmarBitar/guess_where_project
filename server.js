@@ -1,3 +1,4 @@
+//author: Omar Bitar
 // CALL THE PACKAGES --------------------
 var express    = require('express');		// call express
 var app        = express(); 				// define our app using express
@@ -209,6 +210,26 @@ apiRouter.post('/photos', function(req,res){
             });
 
         }else if(userId){
+
+			//// update user upload count
+			var newUploads = 0;
+			User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
+				newUploads = userTemp.uploads;
+				newUploads = newUploads +1;	
+				User.findOneAndUpdate({ username: tempName },{$set: {uploads: newUploads}},
+					{returnOriginal:false},function(err) {
+					if (err) {
+						// duplicate entry
+						if (err.code === 11000)
+							return res.json({ success: false, message: 'no update was made.' });
+						else
+							return res.send(err);
+					}
+					console.log('upload incremented');
+				});
+			})
+
+			//save new photo
             var tempPhoto = new Photos();
                //create link
             var Tpublic_id= userId.username;
@@ -244,16 +265,55 @@ apiRouter.post('/photos', function(req,res){
             })
             console.log('image saved to db');
         }
-    })
+	})	
 
 })
+//=============================================================================================
+//GET AN ARRAY OF PHOTOS SORTED BY DATE
+//=============================================================================================
+apiRouter.get('/worldPhoto',function(req,res){
+	
+	//sort from newest to oldest
+	Photos.find().sort('-time').exec(function(err, aPhoto) {
+		if (err) return res.send(err);
 
-//-----------------------------------------------------------------------------------------
-.get(function(req,res){
-    cloudinary.image("omar.jpg")
+		// return the users
+		res.json(aPhoto);
+	  })
+
+});
+//=============================================================================================
+//GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
+//=============================================================================================
+apiRouter.get('/leaderboards',function(req,res){
+
+	User.find().sort('-discoveries').exec(function(err,aUser){
+		if (err) return res.send(err);
+		res.json(aUser);
+	})
+
+});
+//=============================================================================================
+//GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
+//=============================================================================================
+apiRouter.post('/gpscompate',function(req,res){
+
+	//provide info for picture A
+	var photoLongA = req.body.longA;
+	var	photoLatA = req.body.latA;
+
+	//provide info for picture B
+	var photoLongB = req.body.longB;
+	var	photoLatB = req.body.latB;
+
+	var win = false;
+	/* 
+		code algorithm that calls the google api and compares if both photos are in close proximity 
+	*/
+	if(win===true) res.json({success: true});
+	else res.json({success: false});
+
 })
-
-
 
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', apiRouter);

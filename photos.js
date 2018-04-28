@@ -5,7 +5,8 @@ var Schema       = mongoose.Schema;
 var photoSchema   = new Schema({
     img_url: { type: String, required: true, index: { unique: true }},
     longitude: { type: Number, required: true, index: { unique: false }},
-    latitude: { type: Number, required: true, index: { unique: false }}
+    latitude: { type: Number, required: true, index: { unique: false }},
+    time : { type : Date, default: Date.now }
 })
 
 //middleware that will check if connectedd to the database
