@@ -296,7 +296,7 @@ apiRouter.get('/leaderboards',function(req,res){
 //=============================================================================================
 //GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
 //=============================================================================================
-apiRouter.post('/gpscompate',function(req,res){
+apiRouter.post('/gpscompare',function(req,res){
 
 	//provide info for picture A
 	var photoLongA = req.body.longA;
