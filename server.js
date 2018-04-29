@@ -128,10 +128,12 @@ apiRouter.post('/signin', function(req,res){
 				res.json({
 					success: true,
                     token: token,
-					name: user.name,
+					user: {
+						name: user.name,
 					username: user.username,
 					discoveries: user.discoveries,
 					uploads : user.uploads
+					}
 				});
 			}
 		}
