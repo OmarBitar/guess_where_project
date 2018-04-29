@@ -46,29 +46,39 @@ apiRouter.get('/', function(req, res) {
 //=============================================================================================
 // create a user (accessed at POST http://localhost:8080/signup)
 apiRouter.post('/signup',function(req, res) {
-	if (!req.body.username || !req.body.password) {
-		res.json({success: false, msg: 'Please pass username and password.'});
+	if (!req.body.username || !req.body.password || !req.body.passwordCheck) {
+		res.json({success: false, msg: 'please pass requierd fields.'});
 	}else{
 			var user = new User();		        // create a new instance of the User model
 			//get data from the request body
 			user.name = req.body.name;          // set the users name (comes from the request)
 			user.username = req.body.username;  // set the users username (comes from the request)
 			user.password = req.body.password;  // set the users password (comes from the request)
-			user.discoveries = 0;                      //defult to 0
-            user.uploads = 0;                   //defult to 0
-            
-			user.save(function(err) {
-				if (err) {
-					// duplicate entry
-					if (err.code == 11000) 
-						return res.json({ success: false, message: 'A user with that username already exists. '});
-					else 
-						return res.send(err);
-				}
-
-				// return a message
-				res.json({ message: 'User created!' });
-			});
+			var passowordC = req.body.passwordCheck;
+			if (user.password !== passowordC){
+				res.json({
+					success: false,
+					message: 'password does not match'
+				});
+			} else {
+				//save the user to the database
+				user.discoveries = 0;                //defult to 0
+           		user.uploads = 0;                   //defult to 0
+				user.save(function(err) {
+					if (err) {
+						// duplicate entry
+						if (err.code == 11000) 
+							return res.json({ success: false, message: 'A user with that username already exists. '});
+						else 
+							return res.send(err);
+					}
+						// return a message
+						res.json({ 
+							success: true,
+							message: 'User created!' 
+						});
+				});
+			}
 		};
 });
 //=============================================================================================
@@ -118,7 +128,10 @@ apiRouter.post('/signin', function(req,res){
 				res.json({
 					success: true,
                     token: token,
-                    user
+					name: user.name,
+					username: user.username,
+					discoveries: user.discoveries,
+					uploads : user.uploads
 				});
 			}
 		}
@@ -212,7 +225,7 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 				});
 
 			}else if(userId){
-				
+
 				//// update user upload count
 				var newUploads = 0;
 				User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
@@ -283,6 +296,8 @@ apiRouter.get('/leaderboards',function(req,res){
 
 });
 
+
+//--------------------------------------------------------------------------------------------
 function toRadians (angle) {
 	return angle * (Math.PI / 180);
   }
