@@ -287,7 +287,7 @@ apiRouter.get('/worldPhoto',function(req,res){
 
 });
 //=============================================================================================
-//GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
+//GET AN ARRAY OF THE TOP LEADERBOARD RANKING
 //=============================================================================================
 apiRouter.get('/leaderboards',function(req,res){
 
@@ -300,6 +300,8 @@ apiRouter.get('/leaderboards',function(req,res){
 
 
 //--------------------------------------------------------------------------------------------
+
+
 function toRadians (angle) {
 	return angle * (Math.PI / 180);
   }
@@ -334,10 +336,10 @@ function calcDistance(reqBody) {
 	var d = R * c;
 	console.log(d);
 	return d;
-}  
+}
 
 //=============================================================================================
-//GET AN ARRAY OF THE TOP LEADERBOARDS RANKIG
+//COMPARE GPS COORDINATES
 //=============================================================================================
 apiRouter.post('/gpscompare',function(req,res){
 
@@ -346,8 +348,6 @@ apiRouter.post('/gpscompare',function(req,res){
 	if(calcDistance(req.body) < 2){
 		win = true;
 	}
-
-	
 
 	if(win===true) res.json({success: true});
 	else res.json({success: false});
