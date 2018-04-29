@@ -352,7 +352,7 @@ apiRouter.post('/gpscompare',function(req,res){
 		win = true;
 
 		//increment discoveries by 1
-		db.user.update({ username: decoded.username }, { $inc: { discoveries: 1 }});
+		user.update({ username: decoded.username }, { $inc: { discoveries: 1 }});
 	}
 
 	if(win===true) res.json({success: true});
