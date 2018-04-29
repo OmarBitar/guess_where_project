@@ -12,6 +12,7 @@ var cloudinary  = require('cloudinary');    // for image hosting
 var fs          = require('fs');            // for reading buffer data
 var http        = require('http');
 var Photos      = require('./photos');
+var multer  = require('multer');
 
 var port        = process.env.PORT || 8080; // set the port for our app
 var superSecret = process.env.superSecret;//this is for the webToken
@@ -164,115 +165,98 @@ apiRouter.use(function(req, res, next) {
 //=============================================================================================
 //UPLOAD PHOTOS
 //=============================================================================================
-apiRouter.post('/photos', function(req,res){
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 
-    var photo = req.query.photoUpload;
-    var tempName = req.body.username;
-    var tempLong = req.body.pLongitude;
-    var tempLat = req.body.pLatitude;
-   //error check
-    if(photo === null){
-        res.json({
-            success: false,
-            message: 'photo field is empty'
-        })
-    }
-    if(tempName === null){
-        res.json({
-            success: false,
-            message: 'username field is empty'
-        })
-    }
-    if(tempLong === null){
-        res.json({
-            success: false,
-            message: 'logitued field is empty'
-        })
-    }
-    if(tempLat === null){
-        res.json({
-            success: false,
-            message: 'latitude field is empty'
-        })
-    }
-
-    //save uploader forieng key and image link
-    User.findOne({
-        username: tempName
-    }).select(' username ').exec(function(err,userId){
-        if(err) throw err;
-
-        //no user with that name
-        if(!userId){
-            res.json({
-                success: false,
-                message: 'user not found'
-            });
-
-        }else if(userId){
-
-			//// update user upload count
-			var newUploads = 0;
-			User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
-				newUploads = userTemp.uploads;
-				newUploads = newUploads +1;	
-				User.findOneAndUpdate({ username: tempName },{$set: {uploads: newUploads}},
-					{returnOriginal:false},function(err) {
-					if (err) {
-						// duplicate entry
-						if (err.code === 11000)
-							return res.json({ success: false, message: 'no update was made.' });
-						else
-							return res.send(err);
-					}
-					console.log('upload incremented');
-				});
+	if (!req.file) {
+	  console.log("No file received");
+	  return res.send({
+		success: false
+	  });
+	} else {
+		//save image to the cloud
+		var tempName = req.query.username;
+		var tempLong = req.query.pLongitude;
+		var tempLat = req.query.pLatitude;
+		//error check
+		if(tempName === null){
+			res.json({
+				success: false,
+				message: 'username field is empty'
 			})
+		}
+		if(tempLong === null){
+			res.json({
+				success: false,
+				message: 'logitued field is empty'
+			})
+		}
+		if(tempLat === null){
+			res.json({
+				success: false,
+				message: 'latitude field is empty'
+			})
+		}
+		//check if the user exists in the db
+		User.findOne({
+			username: tempName
+		}).select(' username ').exec(function(err,userId){
+			if(err) throw err;
 
-			//save new photo
-            var tempPhoto = new Photos();
-			   //create link
-			var timestamp = Math.floor(Date.now() / 1000)
-            var Tpublic_id= userId.username + timestamp;
-			//var Tversion = new Date().getTime() / 1000;
-			var Tversion = 1;
-			var Tformat= 'jpg';
-			//define link here to create a temporary Tversion
-            var Tsecure_url= 'https://res.cloudinary.com/image/upload/v'+Tversion+'/'+Tpublic_id+'.'+Tformat;
-            //save to db
-            tempPhoto.img_url = Tsecure_url;
-            tempPhoto.longitude = tempLong;
-			tempPhoto.latitude = tempLat;
-			  //save to cloud
-			  cloudinary.uploader.upload(photo, function(result) { 
-				console.log(result) 
-				Tversion = result.version; 
-				//update link with the actual twersion
-				tempPhoto.img_url= 'https://res.cloudinary.com/dcwatg3bm/image/upload/v'+Tversion+'/'+Tpublic_id+'.'+Tformat;
-				  //save to db and cloud
-				  tempPhoto.save(function(err){
-					if (err) {
-						return res.send(err);
-					}
-					else{
-						res.json({
-							success: true,
-							message: 'image saved to cloud'
-						})
-					}
-				})
-				console.log('image saved to db');
-			},
-			{
-				public_id: Tpublic_id,
-				version: Tversion,
-				format: Tformat,
-				secure_url: Tsecure_url
-			});      
-        }
-	})	
+			//no user with that name
+			if(!userId){
+				res.json({
+					success: false,
+					message: 'user not found'
+				});
 
-})
+			}else if(userId){
+				
+				//// update user upload count
+				var newUploads = 0;
+				User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
+					newUploads = userTemp.uploads;
+					newUploads = newUploads +1;	
+					User.findOneAndUpdate({ username: tempName },{$set: {uploads: newUploads}},
+						{returnOriginal:false},function(err) {
+						if (err) {
+							// duplicate entry
+							if (err.code === 11000)
+								return res.json({ success: false, message: 'no update was made.' });
+							else
+								return res.send(err);
+						}
+							//save image to the cloud
+							cloudinary.uploader.upload_stream( (result) => {
+						
+								//save to image info to db 
+								var tempPhoto = new Photos();
+								tempPhoto.img_url = result.secure_url;
+								tempPhoto.longitude = tempLong;
+								tempPhoto.latitude = tempLat;
+								tempPhoto.save(function(err){
+									if (err) {
+										return res.send(err);
+									}
+									else{
+										res.json({
+											success: true,
+											message: 'image saved to db'
+										})
+									}
+								})
+								console.log('url is: ' + result.secure_url);
+							}).end( req.file.buffer );
+
+						console.log('upload incremented');
+					});
+				})	    
+			}
+		})	
+	}
+  });
+
 //=============================================================================================
 //GET AN ARRAY OF PHOTOS SORTED BY DATE
 //=============================================================================================
