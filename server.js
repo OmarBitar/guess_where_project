@@ -47,7 +47,7 @@ apiRouter.get('/', function(req, res) {
 // create a user (accessed at POST http://localhost:8080/signup)
 apiRouter.post('/signup',function(req, res) {
 	if (!req.body.username || !req.body.password || !req.body.passwordCheck) {
-		res.json({success: false, msg: 'please pass requierd fields.'});
+		res.json({success: false, msg: 'please pass required fields.'});
 	}else{
 			var user = new User();		        // create a new instance of the User model
 			//get data from the request body
@@ -159,7 +159,7 @@ apiRouter.use(function(req, res, next) {
 			if(err){
 				return res.status(403).send({
 					success: false,
-					message: 'Faild to uathenticate token.'
+					message: 'Failed to authenticate token.'
 				});
 			}else{
 				//if everything is good , save to request for use in other routes
@@ -173,7 +173,7 @@ apiRouter.use(function(req, res, next) {
 		// return an HTTP response of 403 (access forbidden) and an error message
 		return res.status(403).send({
 			success: false,
-			message: 'no token provided.'
+			message: 'No token provided.'
 		});
 	}
 });
@@ -204,7 +204,7 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 		if(tempLong === null){
 			res.json({
 				success: false,
-				message: 'logitued field is empty'
+				message: 'longitude field is empty'
 			})
 		}
 		if(tempLat === null){
