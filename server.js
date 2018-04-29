@@ -353,6 +353,7 @@ apiRouter.post('/gpscompare',function(req,res){
             if (err) res.send(err);
 
             user.discoveries += 1;
+        };
 	}
 
 	if(win===true) res.json({success: true});
