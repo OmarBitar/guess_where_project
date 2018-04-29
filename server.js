@@ -344,9 +344,15 @@ function calcDistance(reqBody) {
 apiRouter.post('/gpscompare',function(req,res){
 
 	var win = false;
+    var id = req.body.userId;
 	
 	if(calcDistance(req.body) < 2){
 		win = true;
+
+        User.findById(id, function(err, user) {
+            if (err) res.send(err);
+
+            user.discoveries += 1;
 	}
 
 	if(win===true) res.json({success: true});
