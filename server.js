@@ -12,11 +12,8 @@ var cloudinary  = require('cloudinary');    // for image hosting
 var fs          = require('fs');            // for reading buffer data
 var http        = require('http');
 var Photos      = require('./photos');
-var multer  	= require('multer');
-var jwtDecode 	= require('jwt-decode');
-var crypto 		= require('crypto');
-const readChunk = require('read-chunk'); // npm install read-chunk
-const imageType = require('image-type');
+var multer  = require('multer');
+var jwtDecode = require('jwt-decode');
 
 var port        = process.env.PORT || 8080; // set the port for our app
 var superSecret = process.env.superSecret;//this is for the webToken
@@ -44,60 +41,6 @@ var apiRouter = express.Router();
 apiRouter.get('/', function(req, res) {
   res.send('Welcome to the home page!');
 });
-
-
-var storage = multer.memoryStorage();
-  
-  var upload = multer({storage: storage});
-  
-
-apiRouter.post('/test', upload.single('avatar'),function(req, res) {
-
-	console.log('reading buffer method A');
-	var fileReadStream = fs.createReadStream(req.file, {encoding: "utf16le"});
-	var fileWriteStream = fs.createWriteStream(req.file, {encoding: "utf16le"});
-	var resultis = fileReadStream.pipe(fileWriteStream);
-	console.log(resultis);
-
-	
-	console.log('reading buffer method B');
-	const buffer = readChunk.sync(req.file, 0, 12);
-	var photo = imageType(buffer);
-	console.log(buffer);
-	console.log(photo);
-
-	res.json({
-		success: true
-	})
-
-	/*
-	if (!req.file) {
-		console.log("No file received");
-		return res.send({
-		  success: false
-		});
-	}
-
-	console.log('saving to cloud...')
-	console.log('req.file: ' + photo);
-	console.log('the photo buffer: ' + photo);
-	console.log(req.fle);
-	res.json({
-		success: true,
-		message:'buffer was recived'
-	})
-	
-	cloudinary.v2.uploader.upload_stream({resource_type: "auto"}, function(error, result) {
-		console.log(result)
-		console.log('req.file after saving to cloud: ' + req.file);
-	}).end( req.file.buffer );
-	
-	res.json({
-		success: true,
-		message: 'saved to cloud'
-	});
-	*/
-})
 
 //=============================================================================================
 //CREATE A USER ACCOUNT, WITH NAME, PASS, USERNAME
@@ -238,7 +181,8 @@ apiRouter.use(function(req, res, next) {
 //=============================================================================================
 //UPLOAD PHOTOS
 //=============================================================================================
-
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 
   if (!req.file) {
@@ -402,9 +346,9 @@ apiRouter.post('/gpscompare',function(req,res){
 
   var win = false;
 
-  
     var authToken = req.body.token;
     var decoded = jwt.decode(authToken, process.env.superSecret);
+  
   if(calcDistance(req.body) < 2){
     win = true;
 
