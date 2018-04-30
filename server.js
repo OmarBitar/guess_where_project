@@ -351,17 +351,17 @@ apiRouter.post('/gpscompare',function(req,res){
 	if(calcDistance(req.body) < 2){
 		win = true;
 
-		//increment discoveries by 1
-		User.update(
-			{ username: decoded.username },
-			{ $inc: { discoveries: 1 } }
-			)
+		User.findOneAndUpdate({"username" : decoded.username}, {$inc: { "discoveries" : 1 }}, function(err, doc) {
+			if(err) {throw err; }
+			else { console.log('Updated')}
+		});
+
 	}
 
 	if(win===true) res.json({success: true});
 	else res.json({success: false});
 
-})
+});
 
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', apiRouter);
