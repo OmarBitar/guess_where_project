@@ -13,6 +13,7 @@ var fs          = require('fs');            // for reading buffer data
 var http        = require('http');
 var Photos      = require('./photos');
 var multer  = require('multer');
+var jwtDecode = require('jwt-decode');
 
 var port        = process.env.PORT || 8080; // set the port for our app
 var superSecret = process.env.superSecret;//this is for the webToken
@@ -344,21 +345,26 @@ function calcDistance(reqBody) {
 apiRouter.post('/gpscompare',function(req,res){
 
 	var win = false;
-    var id = req.body.userId;
+
+    var authToken = req.body.token;
+    var decoded = jwt.decode(authToken, process.env.superSecret);
 	
 	if(calcDistance(req.body) < 2){
 		win = true;
 
-        User.findById(id, function(err, user) {
-            if (err) res.send(err);
+		//var tempUsername = decoded.username;
+		console.log(decoded.username);
+		User.findOneAndUpdate({"username" : decoded.username}, {$inc: { "discoveries" : 1 }}, function(err, doc) {
+			if(err) {throw err; }
+			else { console.log('Updated')}
+		});
 
-            user.discoveries += 1;
 	}
 
-	if(win===true) res.json({success: true});
-	else res.json({success: false});
+	if(win===true) res.json({success: true, message: 'correct guess'});
+	else res.json({success: false, message: 'nope, incorrect guess'});
 
-})
+});
 
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', apiRouter);
