@@ -181,7 +181,16 @@ apiRouter.use(function(req, res, next) {
 //=============================================================================================
 //UPLOAD PHOTOS
 //=============================================================================================
-var storage = multer.memoryStorage();
+var storage =  multer.diskStorage({
+	destination: function (req, file, cb) {
+	  cb(null, 'uploads')
+	},
+	filename: function (req, file, cb) {
+		// Rename uploaded file
+		cb(null, file.fieldname + '-' + Date.now())
+	  }
+	})
+	
 var upload = multer({ storage: storage });
 apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 
