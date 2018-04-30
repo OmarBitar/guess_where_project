@@ -192,7 +192,7 @@ var storage =  multer.diskStorage({
 	})
 	
 var upload = multer({ storage: storage });
-apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
+apiRouter.post('/photos', upload.single('avatar'), (req, res, next) => {
 
 	if (!req.file) {
 	  console.log("No file received");
@@ -253,7 +253,8 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 								return res.send(err);
 						}
 							//save image to the cloud
-							cloudinary.v2.uploader.upload_stream( {resource_type: 'auto'}, (err, result) => {
+							cloudinary.v2.uploader
+								.upload_stream( {resource_type: 'auto'}, (err, result) => {
 						
 								//save to image info to db 
 								var tempPhoto = new Photos();
