@@ -183,9 +183,6 @@ apiRouter.use(function(req, res, next) {
 //TEST ROUTE
 apiRouter.post('/test',function(req, res) {
 
-    var authToken = req.body.token;
-    var decoded = jwt.decode(authToken, process.env.superSecret);
-
     // if (!req.file) {
     //     console.log("No file received");
     //     return res.send({
@@ -193,7 +190,7 @@ apiRouter.post('/test',function(req, res) {
     //     });
     // } else {
         //save image to the cloud
-        var tempName = decoded.username;
+        var tempName = req.query.username;
         var tempLong = req.query.pLongitude;
         var tempLat = req.query.pLatitude;
         //error check
