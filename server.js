@@ -45,7 +45,8 @@ apiRouter.get('/', function(req, res) {
 
 var storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-	  cb(null, 'uploads')
+	  cb(null, './uploads');
+	  console.log('saving to uploads');
 	},
 	filename: function (req, file, cb) {
 	  // Rename uploaded file
@@ -57,12 +58,12 @@ var storage = multer.diskStorage({
   
 apiRouter.post('/test', upload.single('avatar'),function(req, res) {
 
-	cloudinary.v2.uploader.upload({resource_type: "auto"}, function(error, result) {
+	cloudinary.v2.uploader.upload_stream({resource_type: "auto"}, function(error, result) {
 		console.log(result)
 	}).end( req.file.buffer );
 	
 	res.json('hello world');
-
+	
 })
 
 //=============================================================================================
