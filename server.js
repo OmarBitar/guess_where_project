@@ -12,8 +12,11 @@ var cloudinary  = require('cloudinary');    // for image hosting
 var fs          = require('fs');            // for reading buffer data
 var http        = require('http');
 var Photos      = require('./photos');
-var multer  = require('multer');
-var jwtDecode = require('jwt-decode');
+var multer  	= require('multer');
+var jwtDecode 	= require('jwt-decode');
+var crypto 		= require('crypto');
+const readChunk = require('read-chunk'); // npm install read-chunk
+const imageType = require('image-type');
 
 var port        = process.env.PORT || 8080; // set the port for our app
 var superSecret = process.env.superSecret;//this is for the webToken
@@ -43,29 +46,47 @@ apiRouter.get('/', function(req, res) {
 });
 
 
-var storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-	  cb(null, './uploads');
-	  console.log('saving to uploads');
-	  console.log('req.file: ' + req.file);
-	  console.log(req.body);
-	},
-	filename: function (req, file, cb) {
-	  // Rename uploaded file
-	  cb(null, file.fieldname + '-' + Date.now());
-	  console.log('saved to uploads');
-	  console.log('req.file: ' + req.file);
-	  console.log(req.body);
-	}
-  })
+var storage = multer.memoryStorage();
   
   var upload = multer({storage: storage});
   
+
 apiRouter.post('/test', upload.single('avatar'),function(req, res) {
 
+	console.log('reading buffer method A');
+	var fileReadStream = fs.createReadStream(req.file, {encoding: "utf16le"});
+	var fileWriteStream = fs.createWriteStream(req.file, {encoding: "utf16le"});
+	var resultis = fileReadStream.pipe(fileWriteStream);
+	console.log(resultis);
+
+	
+	console.log('reading buffer method B');
+	const buffer = readChunk.sync(req.file, 0, 12);
+	var photo = imageType(buffer);
+	console.log(buffer);
+	console.log(photo);
+
+	res.json({
+		success: true
+	})
+
+	/*
+	if (!req.file) {
+		console.log("No file received");
+		return res.send({
+		  success: false
+		});
+	}
+
 	console.log('saving to cloud...')
-	console.log('req.file: ' + req.file);
-	console.log(req.body);
+	console.log('req.file: ' + photo);
+	console.log('the photo buffer: ' + photo);
+	console.log(req.fle);
+	res.json({
+		success: true,
+		message:'buffer was recived'
+	})
+	
 	cloudinary.v2.uploader.upload_stream({resource_type: "auto"}, function(error, result) {
 		console.log(result)
 		console.log('req.file after saving to cloud: ' + req.file);
@@ -75,7 +96,7 @@ apiRouter.post('/test', upload.single('avatar'),function(req, res) {
 		success: true,
 		message: 'saved to cloud'
 	});
-	
+	*/
 })
 
 //=============================================================================================
