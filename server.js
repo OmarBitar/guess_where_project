@@ -42,9 +42,19 @@ apiRouter.get('/', function(req, res) {
   res.send('Welcome to the home page!');
 });
 
-var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
 
+var storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+	  cb(null, 'uploads')
+	},
+	filename: function (req, file, cb) {
+	  // Rename uploaded file
+	  cb(null, file.fieldname + '-' + Date.now())
+	}
+  })
+  
+  var upload = multer({storage: storage});
+  
 apiRouter.post('/test', upload.single('avatar'),function(req, res) {
 
 	cloudinary.v2.uploader.upload_stream({resource_type: "auto"}, function(error, result) {
@@ -193,8 +203,7 @@ apiRouter.use(function(req, res, next) {
 //=============================================================================================
 //UPLOAD PHOTOS
 //=============================================================================================
-var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
+
 apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 
   if (!req.file) {
@@ -358,9 +367,9 @@ apiRouter.post('/gpscompare',function(req,res){
 
   var win = false;
 
+  
     var authToken = req.body.token;
     var decoded = jwt.decode(authToken, process.env.superSecret);
-  
   if(calcDistance(req.body) < 2){
     win = true;
 
