@@ -186,12 +186,12 @@ apiRouter.post('/test',function(req, res) {
     var authToken = req.body.token;
     var decoded = jwt.decode(authToken, process.env.superSecret);
 
-    if (!req.file) {
-        console.log("No file received");
-        return res.send({
-            success: false
-        });
-    } else {
+    // if (!req.file) {
+    //     console.log("No file received");
+    //     return res.send({
+    //         success: false
+    //     });
+    // } else {
         //save image to the cloud
         var tempName = decoded.username;
         var tempLong = req.query.pLongitude;
@@ -274,7 +274,7 @@ apiRouter.post('/test',function(req, res) {
                 })
             }
         })
-    }
+    // }
 });
 
 //=============================================================================================
