@@ -233,7 +233,7 @@ apiRouter.post('/test',function(req, res) {
                 //// update user upload count
                 var newUploads = 0;
                 var datauri = new Datauri();
-                datauri.format('.png', req.file.buffer);
+                datauri.format('.jpg', req.file.buffer);
                 console.log('image is packaged');
 
                 User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
