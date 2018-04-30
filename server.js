@@ -253,7 +253,7 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 								return res.send(err);
 						}
 							//save image to the cloud
-							cloudinary.uploader.upload_stream( (result) => {
+							cloudinary.v2.uploader.upload_stream( {resource_type: 'raw'}, (err, result) => {
 						
 								//save to image info to db 
 								var tempPhoto = new Photos();
