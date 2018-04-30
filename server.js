@@ -254,8 +254,8 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
 				tempPhoto.latitude = tempLat;
 				*/
 				tempPhoto.img_url = 'result';
-                tempPhoto.longitude = 123;
-                tempPhoto.latitude = 123;
+                tempPhoto.longitude = 1323;
+                tempPhoto.latitude = 1233;
                 tempPhoto.save(function(err){
                   if (err) {
                     return res.send(err);
