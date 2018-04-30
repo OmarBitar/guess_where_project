@@ -62,6 +62,7 @@ apiRouter.post('/test', upload.single('avatar'),function(req, res) {
 	}).end( req.file.buffer );
 	
 	res.json('hello world');
+	
 })
 
 //=============================================================================================
