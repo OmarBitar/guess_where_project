@@ -42,11 +42,15 @@ apiRouter.get('/', function(req, res) {
   res.send('Welcome to the home page!');
 });
 
-apiRouter.post('/test',function(req, res) {
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 
-	/*
-		test here
-	*/
+apiRouter.post('/test', upload.single('avatar'),function(req, res) {
+
+	cloudinary.v2.uploader.upload_stream({resource_type: "auto"}, function(error, result) {
+		console.log(result)
+	}).end( req.file.buffer );
+	
 	res.json('hello world');
 })
 
