@@ -244,13 +244,18 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
                 return res.send(err);
             }
               //save image to the cloud
-              cloudinary.uploader.upload_stream( {resource_type: "auto"}, (result) => {
-            
+              cloudinary.v2.uploader.upload_stream( {resource_type: "auto"}, (result) => {
+			
                 //save to image info to db 
-                var tempPhoto = new Photos();
+				var tempPhoto = new Photos();
+				/*
                 tempPhoto.img_url = result.secure_url;
                 tempPhoto.longitude = tempLong;
-                tempPhoto.latitude = tempLat;
+				tempPhoto.latitude = tempLat;
+				*/
+				tempPhoto.img_url = 'result';
+                tempPhoto.longitude = 123;
+                tempPhoto.latitude = 123;
                 tempPhoto.save(function(err){
                   if (err) {
                     return res.send(err);
@@ -262,7 +267,7 @@ apiRouter.post('/photos', upload.single('avatar'), (req, res) => {
                     })
                   }
                 })
-                console.log('url is: ' + result.secure_url);
+                //console.log('url is: ' + result.secure_url);
               }).end( req.file.buffer );
 
             console.log('upload incremented');
