@@ -14,6 +14,7 @@ var http        = require('http');
 var Photos      = require('./photos');
 var multer  = require('multer');
 var jwtDecode = require('jwt-decode');
+var Datauri = require('datauri');
 
 var port        = process.env.PORT || 8080; // set the port for our app
 var superSecret = process.env.superSecret;//this is for the webToken
@@ -44,9 +45,101 @@ apiRouter.get('/', function(req, res) {
 
 apiRouter.post('/test',function(req, res) {
 
-	/*
-		test here
-	*/
+    var authToken = req.body.token;
+    var decoded = jwt.decode(authToken, process.env.superSecret);
+
+    if (!req.file) {
+        console.log("No file received");
+        return res.send({
+            success: false
+        });
+    } else {
+        //save image to the cloud
+        var tempName = decoded.username;
+        var tempLong = req.query.pLongitude;
+        var tempLat = req.query.pLatitude;
+        //error check
+        if(tempName === null){
+            res.json({
+                success: false,
+                message: 'username field is empty'
+            })
+        }
+        if(tempLong === null){
+            res.json({
+                success: false,
+                message: 'longitude field is empty'
+            })
+        }
+        if(tempLat === null){
+            res.json({
+                success: false,
+                message: 'latitude field is empty'
+            })
+        }
+        //check if the user exists in the db
+        User.findOne({
+            username: tempName
+        }).select(' username ').exec(function(err,userId){
+            if(err) throw err;
+
+            //no user with that name
+            if(!userId){
+                res.json({
+                    success: false,
+                    message: 'user not found'
+                });
+
+            }else if(userId){
+
+                //// update user upload count
+                var newUploads = 0;
+                var datauri = new Datauri();
+                datauri.format('.png', req.file.buffer);
+                console.log('image is packaged');
+
+                User.findOne({ username: userId.username }).select('uploads').exec(function(err,userTemp){
+                    newUploads = userTemp.uploads;
+                    newUploads = newUploads +1;
+                    User.findOneAndUpdate({ username: tempName },{$set: {uploads: newUploads}},
+                        {returnOriginal:false},function(err) {
+                            if (err) {
+                                // duplicate entry
+                                if (err.code === 11000)
+                                    return res.json({ success: false, message: 'no update was made.' });
+                                else
+                                    return res.send(err);
+                            }
+                            //save image to the cloud
+                            console.log('sending image to cloudinary');
+                            cloudinary.uploader.upload( datauri.content, function(result) {
+                              //save to image info to db
+                                var tempPhoto = new Photos();
+                                tempPhoto.img_url = result.secure_url;
+                                tempPhoto.longitude = tempLong;
+                                tempPhoto.latitude = tempLat;
+                                tempPhoto.save(function(err){
+                                  if (err) {
+                                    return res.send(err);
+                                  } else{
+                                    res.json({
+                                        success: true,
+                                        message: 'image saved to db'
+                                    })
+                                  }
+                                });
+                            console.log('url is: ' + result.secure_url);
+                            });
+
+                            console.log('upload incremented');
+                        });
+                })
+            }
+        })
+    }
+});
+
+
 	res.json('hello world');
 })
 
